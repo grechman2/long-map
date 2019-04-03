@@ -1,6 +1,9 @@
 package de.comparus.opensource.longmap;
 
 public class LongMapImpl<V> implements LongMap<V> {
+    private int currentArrayCapacity = 16;
+
+
     public V put(long key, V value) {
         return null;
     }
