@@ -16,7 +16,7 @@ public class LongMapImplTest {
 
     @Before
     public void setUp() throws Exception {
-        map = new LongMapImpl<>();
+        map = new LongMapImpl<>(String.class);
     }
 
     @Test
@@ -238,14 +238,12 @@ public class LongMapImplTest {
         List<String> expectedValues
                 = Arrays.asList(testValue1, testValue2, testValue3);
         // act
-        String[] zzz = (String[]) map.values();
-        List xxx = Arrays.asList(map.values());
-        System.out.println(xxx);
+        String[] actualValues =  map.values();
         // asset
-//        assertThat(actualValues.length).isEqualTo(3);
-//        for(int i = 0; i < expectedValues.size(); i++){
-//            assertThat(actualValues[0]).isIn(expectedValues);
-//        }
+        assertThat(actualValues.length).isEqualTo(3);
+        for(int i = 0; i < expectedValues.size(); i++){
+            assertThat(actualValues[0]).isIn(expectedValues);
+        }
     }
 
 

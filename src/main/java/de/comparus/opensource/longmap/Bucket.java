@@ -1,20 +1,17 @@
 package de.comparus.opensource.longmap;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Bucket<V> {
 
-    private int bucketSize = 6;
-    private int numberOfElements = 0;
-    private KeyValueNode<V>[] nodes;
+    private List<KeyValueNode<V>> nodes;
 
     public Bucket() {
-        nodes = createNewValueNodeArray(bucketSize);
-    }
-
-    public Bucket(int bucketSize) {
-        this.bucketSize = bucketSize;
+        nodes = new ArrayList<>();
     }
 
     public void addItem(KeyValueNode<V> item){
@@ -38,86 +35,36 @@ public class Bucket<V> {
        return item;
     }
 
-    public KeyValueNode<V>[] getAllItems(){
-        KeyValueNode<V>[] tmp = createNewValueNodeArray(nodes.length);
-        int nextCellIndex = 0;
-        for(int i = 0; i < nodes.length; i++){
-           if(nodes[i] != null){
-               tmp[nextCellIndex] = nodes[i];
-               nextCellIndex++;
-           }
-       }
-       return Arrays.copyOfRange(tmp, 0, nextCellIndex);
+    public List<KeyValueNode<V>> getAllItems(){
+        return nodes;
     }
 
-    public V[] getAllValue(){
-        @SuppressWarnings({"rawtypes","unchecked"})
-        V[] tmp = (V[]) new Object[nodes.length];
-        int nextCellIndex = 0;
-        for(int i = 0; i < nodes.length; i++){
-            if(nodes[i] != null){
-                tmp[nextCellIndex] = nodes[i].getValue();
-                nextCellIndex++;
-            }
-        }
-        return Arrays.copyOfRange(tmp, 0, nextCellIndex);
+    public List<V> getAllValue(){
+        return nodes.stream().map(item -> item.getValue()).collect(Collectors.toList());
     }
 
     public long[] getAllKeys(){
-        long[] tmp = new long[nodes.length];
-        int nextCellIndex = 0;
-        for(int i = 0; i < nodes.length; i++){
-            if(nodes[i] != null){
-                tmp[nextCellIndex] = nodes[i].getKey();
-                nextCellIndex++;
-            }
-        }
-        return Arrays.copyOfRange(tmp, 0, nextCellIndex);
+        return nodes.stream().mapToLong(item -> item.getKey()).toArray();
     }
 
     public KeyValueNode<V> searchForItemByKey(long key){
-        for(int i = 0; i < nodes.length; i++){
-            KeyValueNode<V> keyValueNode = nodes[i];
-            if (keyValueNode != null && keyValueNode.getKey() == key){
-                return keyValueNode;
-            }
-        }
-        return null;
+        Optional<KeyValueNode<V>> node = nodes.stream().filter(item -> item.getKey() == key).findFirst();
+        return node.isPresent() == true? node.get() : null;
     }
 
     public KeyValueNode<V> searchForItemByValue(V value){
-        for(int i = 0; i < nodes.length; i++){
-            KeyValueNode<V> keyValueNode = nodes[i];
-            if (keyValueNode != null && keyValueNode.getValue() != null && keyValueNode.getValue().equals(value)){
-                return keyValueNode;
-            }
-        }
-        return null;
+        Optional<KeyValueNode<V>> node = nodes.stream().filter(item ->  item.getValue() != null && item.getValue().equals(value)).findFirst();
+        return node.isPresent() == true? node.get() : null;
     }
 
     public void addItemToEmptyCell(KeyValueNode<V> item){
-        for(int i = 0; i < nodes.length; i++){
-            KeyValueNode<V> keyValueNode = nodes[i];
-            if(keyValueNode == null){
-                nodes[i] = item;
-                return;
-            }
-        }
+       nodes.add(item);
     }
 
-    @SuppressWarnings({"rawtypes","unchecked"})
-    private KeyValueNode<V>[] createNewValueNodeArray(int size){
-        return (KeyValueNode<V>[]) new KeyValueNode[size];
-    }
 
     public KeyValueNode<V> removeItem(long key) {
-        for(int i = 0; i < nodes.length; i++){
-            KeyValueNode<V> keyValueNode = nodes[i];
-            if (keyValueNode != null && keyValueNode.getKey() == key){
-                nodes[i] = null;
-                return keyValueNode;
-            }
-        }
-        return null;
+        KeyValueNode<V> itemToRemove = searchForItemByKey(key);
+        if(itemToRemove == null || !nodes.remove(itemToRemove)) return null;
+        return itemToRemove;
     }
 }

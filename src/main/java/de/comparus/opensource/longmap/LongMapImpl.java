@@ -1,21 +1,30 @@
 package de.comparus.opensource.longmap;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class LongMapImpl<V> implements LongMap<V> {
 
     private static final float REHASH_THRESHHOLD = 0.7f;
-
     private int currentArrayCapacity;
     private Bucket<V>[] buckets;
     private int numberOfItems;
+    private Class<V> valuesClazz;
 
-
-    public LongMapImpl() {
-        this(16);
+    /**
+     *  Class of value type should be passed as a parameter, as
+     *  it is not possible to create array with generic type, as
+     *  types are erased at runtime.
+     * */
+    public LongMapImpl(Class<V> clazzOfValue) {
+        this(16, clazzOfValue);
     }
 
-    public LongMapImpl(int currentArrayCapacity) {
+    public LongMapImpl(int currentArrayCapacity, Class<V> clazzOfValue) {
+        this.valuesClazz = clazzOfValue;
         this.currentArrayCapacity = currentArrayCapacity;
         buckets = createNewBucketsArray(currentArrayCapacity);
     }
@@ -82,19 +91,15 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     public V[] values() {
-        @SuppressWarnings({"rawtypes","unchecked"})
-        V[] allValues = (V[]) new Object[numberOfItems];
-        int currentIndex = 0;
+        List<V> allValues = new ArrayList<>();
         for(int i = 0; i < buckets.length ; i++){
             Bucket<V> bucket = buckets[i];
             if(bucket == null) continue;
-
-            @SuppressWarnings({"rawtypes","unchecked"})
-            V[] allBucketItems = bucket.getAllValue();
-            System.arraycopy(allBucketItems, 0, allValues, currentIndex, allBucketItems.length);
-            currentIndex +=allBucketItems.length;
+            allValues.addAll(bucket.getAllValue());
         }
-        return allValues;
+        V[] result = (V[]) Array.newInstance(valuesClazz, allValues.size());
+        allValues.toArray(result);
+        return result;
     }
 
     public long size() {
@@ -102,7 +107,6 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     public void clear() {
-
     }
 
     private int calculateBucketAddress(long key){
@@ -130,6 +134,7 @@ public class LongMapImpl<V> implements LongMap<V> {
     private void rehash() {
         int newArrayCapacity = currentArrayCapacity * 2;
         Bucket<V>[] newBuckets = createNewBucketsArray(newArrayCapacity);
+
 
     }
 }
