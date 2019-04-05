@@ -3,7 +3,9 @@ package de.comparus.opensource.longmap;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -219,6 +221,31 @@ public class LongMapImplTest {
         // asset
         assertThat(map.size()).isEqualTo(1);
         assertThat(containsValue).isEqualTo(false);
+    }
+
+    @Test
+    public void testValues_GivenMapIsNotEmpty_whenInvokeTheMethod_thenGetArrayOfValues(){
+        // arrange
+        String testValue1 = "SomeValue1";
+        Long key1 = 100L;
+        String testValue2 = "SomeValue2";
+        Long key2 = 110L;
+        String testValue3 = "SomeValue3";
+        Long key3 = 120L;
+        map.put(key1, testValue1);
+        map.put(key2, testValue2);
+        map.put(key3, testValue3);
+        List<String> expectedValues
+                = Arrays.asList(testValue1, testValue2, testValue3);
+        // act
+        String[] zzz = (String[]) map.values();
+        List xxx = Arrays.asList(map.values());
+        System.out.println(xxx);
+        // asset
+//        assertThat(actualValues.length).isEqualTo(3);
+//        for(int i = 0; i < expectedValues.size(); i++){
+//            assertThat(actualValues[0]).isIn(expectedValues);
+//        }
     }
 
 

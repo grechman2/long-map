@@ -1,5 +1,8 @@
 package de.comparus.opensource.longmap;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class Bucket<V> {
 
     private int bucketSize = 6;
@@ -26,16 +29,53 @@ public class Bucket<V> {
         return searchForItemByValue(value) != null;
     }
 
-    boolean isBucketContainsItemByKey(Long key){
+    boolean isBucketContainsItemByKey(long key){
         return searchForItemByKey(key) != null;
     }
 
-    public KeyValueNode<V> getItem(Long key) {
+    public KeyValueNode<V> getItem(long key) {
        KeyValueNode<V> item = searchForItemByKey(key);
        return item;
     }
 
-    public KeyValueNode<V> searchForItemByKey(Long key){
+    public KeyValueNode<V>[] getAllItems(){
+        KeyValueNode<V>[] tmp = createNewValueNodeArray(nodes.length);
+        int nextCellIndex = 0;
+        for(int i = 0; i < nodes.length; i++){
+           if(nodes[i] != null){
+               tmp[nextCellIndex] = nodes[i];
+               nextCellIndex++;
+           }
+       }
+       return Arrays.copyOfRange(tmp, 0, nextCellIndex);
+    }
+
+    public V[] getAllValue(){
+        @SuppressWarnings({"rawtypes","unchecked"})
+        V[] tmp = (V[]) new Object[nodes.length];
+        int nextCellIndex = 0;
+        for(int i = 0; i < nodes.length; i++){
+            if(nodes[i] != null){
+                tmp[nextCellIndex] = nodes[i].getValue();
+                nextCellIndex++;
+            }
+        }
+        return Arrays.copyOfRange(tmp, 0, nextCellIndex);
+    }
+
+    public long[] getAllKeys(){
+        long[] tmp = new long[nodes.length];
+        int nextCellIndex = 0;
+        for(int i = 0; i < nodes.length; i++){
+            if(nodes[i] != null){
+                tmp[nextCellIndex] = nodes[i].getKey();
+                nextCellIndex++;
+            }
+        }
+        return Arrays.copyOfRange(tmp, 0, nextCellIndex);
+    }
+
+    public KeyValueNode<V> searchForItemByKey(long key){
         for(int i = 0; i < nodes.length; i++){
             KeyValueNode<V> keyValueNode = nodes[i];
             if (keyValueNode != null && keyValueNode.getKey() == key){
@@ -75,7 +115,7 @@ public class Bucket<V> {
             KeyValueNode<V> keyValueNode = nodes[i];
             if (keyValueNode != null && keyValueNode.getKey() == key){
                 nodes[i] = null;
-                 return keyValueNode;
+                return keyValueNode;
             }
         }
         return null;

@@ -1,9 +1,15 @@
 package de.comparus.opensource.longmap;
 
+import java.util.Arrays;
+
 public class LongMapImpl<V> implements LongMap<V> {
+
+    private static final float REHASH_THRESHHOLD = 0.7f;
+
     private int currentArrayCapacity;
     private Bucket<V>[] buckets;
-    private long numberOfItems;
+    private int numberOfItems;
+
 
     public LongMapImpl() {
         this(16);
@@ -16,6 +22,10 @@ public class LongMapImpl<V> implements LongMap<V> {
 
     public V put(long key, V value) {
         KeyValueNode<V> keyValueNode = new KeyValueNode<>(key, value);
+        if(currenHashLoadIndicator() >= REHASH_THRESHHOLD ){
+            rehash();
+        }
+
         Bucket<V> bucket = getBucket(key);
         if(!bucket.isBucketContainsItemByKey(keyValueNode)){
             bucket.addItem(keyValueNode);
@@ -72,7 +82,19 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     public V[] values() {
-        return null;
+        @SuppressWarnings({"rawtypes","unchecked"})
+        V[] allValues = (V[]) new Object[numberOfItems];
+        int currentIndex = 0;
+        for(int i = 0; i < buckets.length ; i++){
+            Bucket<V> bucket = buckets[i];
+            if(bucket == null) continue;
+
+            @SuppressWarnings({"rawtypes","unchecked"})
+            V[] allBucketItems = bucket.getAllValue();
+            System.arraycopy(allBucketItems, 0, allValues, currentIndex, allBucketItems.length);
+            currentIndex +=allBucketItems.length;
+        }
+        return allValues;
     }
 
     public long size() {
@@ -99,5 +121,15 @@ public class LongMapImpl<V> implements LongMap<V> {
             buckets[calculateBucketAddress(key)] = bucket;
         }
         return bucket;
+    }
+
+    private float currenHashLoadIndicator(){
+        return numberOfItems / buckets.length;
+    }
+
+    private void rehash() {
+        int newArrayCapacity = currentArrayCapacity * 2;
+        Bucket<V>[] newBuckets = createNewBucketsArray(newArrayCapacity);
+
     }
 }
