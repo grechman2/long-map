@@ -240,10 +240,65 @@ public class LongMapImplTest {
         // act
         String[] actualValues =  map.values();
         // asset
-        assertThat(actualValues.length).isEqualTo(3);
+        assertThat(actualValues.length).isEqualTo(expectedValues.size());
         for(int i = 0; i < expectedValues.size(); i++){
             assertThat(actualValues[0]).isIn(expectedValues);
         }
+    }
+
+    @Test
+    public void testValues_GivenMapIsEmpty_whenInvokeTheMethod_thenGetEmptyArray(){
+        // act
+        String[] actualValues =  map.values();
+        // asset
+        assertThat(actualValues.length).isEqualTo(0);
+    }
+
+    @Test
+    public void testKeys_GivenMapIsNotEmpty_whenInvokeTheMethod_thenGetArrayOfKeys(){
+        // arrange
+        String testValue1 = "SomeValue1";
+        Long key1 = 100L;
+        String testValue2 = "SomeValue2";
+        Long key2 = 110L;
+        String testValue3 = "SomeValue3";
+        Long key3 = 120L;
+        map.put(key1, testValue1);
+        map.put(key2, testValue2);
+        map.put(key3, testValue3);
+        long[] expectedKeys = {key1, key2, key3};
+        // act
+        long[] actualKeys =  map.keys();
+        // asset
+        assertThat(actualKeys.length).isEqualTo(expectedKeys.length);
+        assertThat(actualKeys).containsExactlyInAnyOrder(actualKeys);
+    }
+
+    @Test
+    public void testKeys_GivenMapIsEmpty_whenInvokeTheMethod_thenGetEmptyArray(){
+        // act
+        long[] actualKeys =  map.keys();
+        // asset
+        assertThat(actualKeys.length).isEqualTo(0);
+    }
+
+    @Test
+    public void testClearAll_GivenMapIsNotEmpty_whenInvokeTheMethod_thenMapIsCleared(){
+        // arrange
+        String testValue1 = "SomeValue1";
+        Long key1 = 100L;
+        String testValue2 = "SomeValue2";
+        Long key2 = 110L;
+        String testValue3 = "SomeValue3";
+        Long key3 = 120L;
+        map.put(key1, testValue1);
+        map.put(key2, testValue2);
+        map.put(key3, testValue3);
+        // act
+        map.clear();
+        // asset
+        assertThat(map.size()).isEqualTo(0);
+        assertThat(map.keys().length).isEqualTo(0);
     }
 
 

@@ -2,14 +2,12 @@ package de.comparus.opensource.longmap;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class LongMapImpl<V> implements LongMap<V> {
 
     private static final float REHASH_THRESHHOLD = 0.7f;
-    private int currentArrayCapacity;
+    private int bucketsArraySize;
     private Bucket<V>[] buckets;
     private int numberOfItems;
     private Class<V> valuesClazz;
@@ -23,15 +21,15 @@ public class LongMapImpl<V> implements LongMap<V> {
         this(16, clazzOfValue);
     }
 
-    public LongMapImpl(int currentArrayCapacity, Class<V> clazzOfValue) {
+    public LongMapImpl(int bucketsArraySize, Class<V> clazzOfValue) {
         this.valuesClazz = clazzOfValue;
-        this.currentArrayCapacity = currentArrayCapacity;
-        buckets = createNewBucketsArray(currentArrayCapacity);
+        this.bucketsArraySize = bucketsArraySize;
+        buckets = createNewBucketsArray(bucketsArraySize);
     }
 
     public V put(long key, V value) {
         KeyValueNode<V> keyValueNode = new KeyValueNode<>(key, value);
-        if(currenHashLoadIndicator() >= REHASH_THRESHHOLD ){
+        if(currenHashCapacity() >= REHASH_THRESHHOLD ){
             rehash();
         }
 
@@ -87,7 +85,15 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     public long[] keys() {
-        return null;
+        long[] allKeys = new long[numberOfItems];
+        int numOfAddedKeys = 0;
+        for(int i = 0; i < buckets.length ; i++){
+            Bucket<V> bucket = buckets[i];
+            if(bucket == null) continue;
+            long[] bucketKeys = bucket.getAllKeys();
+            System.arraycopy(bucketKeys, 0, allKeys, numOfAddedKeys, bucketKeys.length);
+        }
+        return allKeys;
     }
 
     public V[] values() {
@@ -107,10 +113,19 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     public void clear() {
+        if(size() == 0) return;
+        for(int i = 0; i < buckets.length ; i++){
+            buckets[i] = null;
+        }
+        numberOfItems = 0;
     }
 
     private int calculateBucketAddress(long key){
-        return (int) key % currentArrayCapacity;
+       return calculateBucketAddressForSpecificSizeOfBucketArray(key, bucketsArraySize);
+    }
+
+    private int calculateBucketAddressForSpecificSizeOfBucketArray(long key, int bucketsArrayLength){
+        return (int) key % bucketsArrayLength;
     }
 
     @SuppressWarnings({"rawtypes","unchecked"})
@@ -119,22 +134,40 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     private Bucket<V> getBucket(Long key){
-        Bucket<V> bucket = buckets[calculateBucketAddress(key)];
+       return getBucket(key, buckets);
+    }
+
+    private Bucket<V> getBucket(Long key, Bucket<V>[] bucketsArray){
+        Bucket<V> bucket = bucketsArray[calculateBucketAddressForSpecificSizeOfBucketArray(key, bucketsArray.length)];
         if(bucket == null) {
             bucket = new Bucket<>();
-            buckets[calculateBucketAddress(key)] = bucket;
+            bucketsArray[calculateBucketAddressForSpecificSizeOfBucketArray(key, bucketsArray.length)] = bucket;
         }
         return bucket;
     }
 
-    private float currenHashLoadIndicator(){
-        return numberOfItems / buckets.length;
+    private float currenHashCapacity(){
+        return (float) numberOfItems / buckets.length;
     }
 
     private void rehash() {
-        int newArrayCapacity = currentArrayCapacity * 2;
+        int newArrayCapacity = bucketsArraySize * 2;
         Bucket<V>[] newBuckets = createNewBucketsArray(newArrayCapacity);
+        for(int i = 0; i < buckets.length ; i++){
+            Bucket<V> bucket = buckets[i];
+            if(bucket == null) continue;
+            bucket.getAllItems().forEach( item -> moveKeyValuePairToNewBucketsArray(newBuckets, item));
+        }
+        bucketsArraySize = newArrayCapacity;
+        buckets = newBuckets;
+    };
 
+    private void moveKeyValuePairToNewBucketsArray(Bucket<V>[] newBucketsArray, KeyValueNode<V> pair){
+        Bucket<V> bucket = getBucket(pair.getKey(), newBucketsArray);
+        bucket.addItem(pair);
+    }
 
+    protected int getBucketsArraySize(){
+        return buckets.length;
     }
 }
