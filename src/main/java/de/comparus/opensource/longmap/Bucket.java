@@ -61,10 +61,10 @@ public class Bucket<V> {
        nodes.add(item);
     }
 
-
     public KeyValueNode<V> removeItem(long key) {
         KeyValueNode<V> itemToRemove = searchForItemByKey(key);
-        if(itemToRemove == null || !nodes.remove(itemToRemove)) return null;
+        if(itemToRemove == null) return null;
+        nodes.remove(itemToRemove);
         return itemToRemove;
     }
 }

@@ -7,7 +7,6 @@ import java.util.List;
 public class LongMapImpl<V> implements LongMap<V> {
 
     private static final float REHASH_THRESHHOLD = 0.7f;
-    private int bucketsArraySize;
     private Bucket<V>[] buckets;
     private int numberOfItems;
     private Class<V> valuesClazz;
@@ -23,18 +22,16 @@ public class LongMapImpl<V> implements LongMap<V> {
 
     public LongMapImpl(int bucketsArraySize, Class<V> clazzOfValue) {
         this.valuesClazz = clazzOfValue;
-        this.bucketsArraySize = bucketsArraySize;
         buckets = createNewBucketsArray(bucketsArraySize);
     }
 
     public V put(long key, V value) {
-        KeyValueNode<V> keyValueNode = new KeyValueNode<>(key, value);
         if(currenHashCapacity() >= REHASH_THRESHHOLD ){
             rehash();
         }
-
         Bucket<V> bucket = getBucket(key);
-        if(!bucket.isBucketContainsItemByKey(keyValueNode)){
+        if(!bucket.isBucketContainsItemByKey(key)){
+            KeyValueNode<V> keyValueNode = new KeyValueNode<>(key, value);
             bucket.addItem(keyValueNode);
             numberOfItems++;
         }else{
@@ -127,10 +124,6 @@ public class LongMapImpl<V> implements LongMap<V> {
         numberOfItems = 0;
     }
 
-    private int calculateBucketAddress(long key){
-       return calculateBucketAddressForSpecificSizeOfBucketArray(key, bucketsArraySize);
-    }
-
     private int calculateBucketAddressForSpecificSizeOfBucketArray(long key, int bucketsArrayLength){
         return (int) Math.abs(key) % bucketsArrayLength;
     }
@@ -140,11 +133,11 @@ public class LongMapImpl<V> implements LongMap<V> {
         return (Bucket<V>[]) new Bucket[size];
     }
 
-    private Bucket<V> getBucket(Long key){
+    private Bucket<V> getBucket(long key){
        return getBucket(key, buckets);
     }
 
-    private Bucket<V> getBucket(Long key, Bucket<V>[] bucketsArray){
+    private Bucket<V> getBucket(long key, Bucket<V>[] bucketsArray){
         Bucket<V> bucket = bucketsArray[calculateBucketAddressForSpecificSizeOfBucketArray(key, bucketsArray.length)];
         if(bucket == null) {
             bucket = new Bucket<>();
@@ -158,14 +151,13 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     private void rehash() {
-        int newArrayCapacity = bucketsArraySize * 2;
+        int newArrayCapacity = buckets.length * 2;
         Bucket<V>[] newBuckets = createNewBucketsArray(newArrayCapacity);
         for(int i = 0; i < buckets.length ; i++){
             Bucket<V> bucket = buckets[i];
             if(bucket == null) continue;
             bucket.getAllItems().forEach( item -> moveKeyValuePairToNewBucketsArray(newBuckets, item));
         }
-        bucketsArraySize = newArrayCapacity;
         buckets = newBuckets;
     };
 

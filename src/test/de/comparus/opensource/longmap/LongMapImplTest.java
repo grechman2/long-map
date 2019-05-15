@@ -152,6 +152,20 @@ public class LongMapImplTest {
     }
 
     @Test
+    public void testRemove_GivenKeyValuePairInMapWithNegativeKey_whenRemoveByKey_thenElementIsRemoved(){
+        // arrange
+        String testValue = "TestValue";
+        Long key = -100L;
+        map.put(key, testValue);
+        // act
+        String actualValue = map.remove(key);
+        // asset
+        assertThat(map.size()).isEqualTo(0);
+        assertThat(map.get(key)).isEqualTo(null);
+        assertThat(actualValue).isEqualTo(testValue);
+    }
+
+    @Test
     public void testRemove_GivenEmptyMap_whenRemoveByKey_thenNullValueIsReturned(){
         // arrange
         String testValue = "TestValue";
