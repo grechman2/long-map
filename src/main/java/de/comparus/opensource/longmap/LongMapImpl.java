@@ -37,6 +37,9 @@ public class LongMapImpl<V> implements LongMap<V> {
         if(!bucket.isBucketContainsItemByKey(keyValueNode)){
             bucket.addItem(keyValueNode);
             numberOfItems++;
+        }else{
+            KeyValueNode<V> node = bucket.getItem(key);
+            node.setValue(value);
         }
         return value;
     }
@@ -91,7 +94,11 @@ public class LongMapImpl<V> implements LongMap<V> {
             Bucket<V> bucket = buckets[i];
             if(bucket == null) continue;
             long[] bucketKeys = bucket.getAllKeys();
-            System.arraycopy(bucketKeys, 0, allKeys, numOfAddedKeys, bucketKeys.length);
+
+            for(int j = numOfAddedKeys, k = 0; k < bucketKeys.length; j++ , k++){
+                allKeys[j] = bucketKeys[k];
+            }
+            numOfAddedKeys += bucketKeys.length;
         }
         return allKeys;
     }
@@ -125,7 +132,7 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     private int calculateBucketAddressForSpecificSizeOfBucketArray(long key, int bucketsArrayLength){
-        return (int) key % bucketsArrayLength;
+        return (int) Math.abs(key) % bucketsArrayLength;
     }
 
     @SuppressWarnings({"rawtypes","unchecked"})

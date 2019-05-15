@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -32,6 +31,18 @@ public class LongMapImplTest {
     }
 
     @Test
+    public void testPut_GivenEmptyMap_whenPutValueWithNegativeKey_thenContainsOneElementAndIsAbleToGetThatValueBack() {
+        // arrange
+        String testValue = "TestValue";
+        Long key = -100L;
+        // act
+        String actualValue = map.put(key, testValue);
+        // asset
+        assertThat(map.size()).isEqualTo(1);
+        assertThat(map.get(key)).isEqualTo(testValue);
+    }
+
+    @Test
     public void testPut_GivenEmptyMap_whenPutTheSameValueTwice_thenContainsOneElement() {
         // arrange
         String testValue = "TestValue";
@@ -43,6 +54,36 @@ public class LongMapImplTest {
         assertThat(map.size()).isEqualTo(1);
         assertThat(actualValue).isEqualTo(testValue);
         assertThat(actualValue2).isEqualTo(testValue);
+    }
+
+    @Test
+    public void testPut_GivenMapWithKeyValuePair_whenPutTheValueWithTheSameKey_thenValueIsUpdated() {
+        // arrange
+        String testValue1 = "TestValue1";
+        String testValue2 = "TestValue2";
+        Long key = 100L;
+        map.put(key, testValue1);
+
+        // act
+        map.put(key, testValue2);
+
+        // assert
+        assertThat(map.size()).isEqualTo(1);
+        assertThat(map.get(key)).isEqualTo(testValue2);
+    }
+
+    @Test
+    public void testPut_GivenMapWithKeyValuePair_whenPutTheValueWithTheZeroKey_thenGetValue() {
+        // arrange
+        String testValue1 = "TestValue1";
+        Long key = 0L;
+
+        // act
+        map.put(key, testValue1);
+
+        // assert
+        assertThat(map.size()).isEqualTo(1);
+        assertThat(map.get(key)).isEqualTo(testValue1);
     }
 
     @Test
@@ -271,7 +312,7 @@ public class LongMapImplTest {
         long[] actualKeys =  map.keys();
         // asset
         assertThat(actualKeys.length).isEqualTo(expectedKeys.length);
-        assertThat(actualKeys).containsExactlyInAnyOrder(actualKeys);
+        assertThat(actualKeys).containsExactlyInAnyOrder(expectedKeys);
     }
 
     @Test
