@@ -66,12 +66,12 @@ public class LongMapImpl<V> implements LongMap<V> {
     }
 
     public boolean containsKey(long key) {
-        for(int i = 0; i < buckets.length; i++ ){
-            Bucket<V> bucket = buckets[i];
-            if(bucket == null ) continue;
-            if(bucket.isBucketContainsItemByKey(key)){
-                return true;
-            }
+        Bucket<V> bucket = getBucket(key);
+
+        if(bucket == null) return false;
+
+        if(bucket.isBucketContainsItemByKey(key)){
+            return true;
         }
         return false;
     }
